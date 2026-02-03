@@ -3,10 +3,10 @@ import { CategoryButton } from '@/components/CategoryButton/CategoryButton';
 import { SearchBar } from '@/components/SearchBar/SearchBar';
 import { ProductCard } from '@/components/ProductCard/ProductCard';
 import { useUIStore } from '@/lib/store';
-import { CATEGORIES, PRODUCTS } from '@/data/products';
+import { useMenu } from '@/lib/useMenu';
 import { getTranslation } from '@/lib/i18n/translations';
-import { Wifi, Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Wifi, Copy, Check, Loader2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 
 export function Home() {
@@ -14,29 +14,56 @@ export function Home() {
   const t = getTranslation(language);
   const [copied, setCopied] = useState(false);
 
+  // Fetch data from Supabase
+  const { categories, menuItems, isLoading, error } = useMenu();
+
   const copyWifiPassword = () => {
     navigator.clipboard.writeText('asanaki81');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const sortedCategories = [...CATEGORIES].sort((a, b) => a.order - b.order);
+  // Sort categories by order
+  const sortedCategories = useMemo(() =>
+    [...categories].sort((a, b) => a.order - b.order),
+    [categories]
+  );
 
   // Filter products based on search query
-  const filteredProducts = searchQuery.trim()
-    ? PRODUCTS.filter((product) => {
-      const query = searchQuery.toLowerCase();
-      return (
-        product.name.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query) ||
-        product.descriptionVi?.toLowerCase().includes(query) ||
-        product.descriptionJa?.toLowerCase().includes(query) ||
-        product.descriptionKo?.toLowerCase().includes(query)
-      );
-    })
-    : [];
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+
+    const query = searchQuery.toLowerCase();
+    return menuItems.filter((product) =>
+      product.name.toLowerCase().includes(query) ||
+      product.description.toLowerCase().includes(query)
+    );
+  }, [menuItems, searchQuery]);
 
   const showSearchResults = searchQuery.trim().length > 0;
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-6">
+          <div className="text-center py-12">
+            <p className="text-red-600">Failed to load menu: {error}</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

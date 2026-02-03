@@ -4,37 +4,31 @@ import { Header } from '@/components/Header/Header';
 import { SearchBar } from '@/components/SearchBar/SearchBar';
 import { ProductCard } from '@/components/ProductCard/ProductCard';
 import { useUIStore } from '@/lib/store';
-import { CATEGORIES, PRODUCTS } from '@/data/products';
-import type { CategoryId } from '@/types/menu';
+import { useMenuByCategory } from '@/lib/useMenu';
+import { Loader2 } from 'lucide-react';
 
 export function CategoryView() {
-  const { categoryId } = useParams<{ categoryId: CategoryId }>();
+  const { categoryId } = useParams<{ categoryId: string }>();
   const { language, searchQuery } = useUIStore();
 
-  const category = CATEGORIES.find((cat) => cat.id === categoryId);
+  // Fetch data from Supabase
+  const { category, items, isLoading, error } = useMenuByCategory(categoryId ?? '');
 
+  // Filter by search query
   const filteredProducts = useMemo(() => {
-    let products = PRODUCTS.filter(
-      (product) => product.category === categoryId
+    if (!searchQuery.trim()) return items;
+
+    const query = searchQuery.toLowerCase();
+    return items.filter(
+      (product) =>
+        product.name.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query) ||
+        product.subcategory?.toLowerCase().includes(query)
     );
+  }, [items, searchQuery]);
 
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      products = products.filter(
-        (product) =>
-          product.name.toLowerCase().includes(query) ||
-          product.nameVi?.toLowerCase().includes(query) ||
-          product.nameJa?.toLowerCase().includes(query) ||
-          product.description.toLowerCase().includes(query) ||
-          product.subcategory?.toLowerCase().includes(query)
-      );
-    }
-
-    return products;
-  }, [categoryId, searchQuery]);
-
-  // Group products by subcategory
-  const groupedProducts = useMemo(() => {
+  // Group filtered products by subcategory
+  const filteredGroupedProducts = useMemo(() => {
     const groups: Record<string, typeof filteredProducts> = {};
 
     filteredProducts.forEach((product) => {
@@ -59,6 +53,29 @@ export function CategoryView() {
         return category.name;
     }
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-6">
+          <div className="text-center py-12">
+            <p className="text-red-600">Failed to load menu: {error}</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (!category) {
     return (
@@ -99,7 +116,7 @@ export function CategoryView() {
           </div>
         ) : (
           <div className="space-y-8">
-            {Object.entries(groupedProducts).map(([subcategory, products]) => (
+            {Object.entries(filteredGroupedProducts).map(([subcategory, products]) => (
               <div key={subcategory}>
                 {subcategory !== 'main' && (
                   <h3 className="text-lg font-semibold text-gray-700 uppercase tracking-wide mb-4 border-b border-gray-200 pb-2">
