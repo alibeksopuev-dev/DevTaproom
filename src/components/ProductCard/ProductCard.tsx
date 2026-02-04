@@ -1,5 +1,5 @@
 import { Plus, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -25,8 +25,21 @@ interface ProductCardProps {
 export function ProductCard({ product, language }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const t = getTranslation(language);
-  const [selectedSize, setSelectedSize] = useState<BeerSize>('0.33');
+
+  // Use first available size as default if prices exist
+  const defaultSize = product.prices && product.prices.length > 0
+    ? product.prices[0].size
+    : undefined;
+
+  const [selectedSize, setSelectedSize] = useState<BeerSize | undefined>(defaultSize);
   const [wasAdded, setWasAdded] = useState(false);
+
+  // Update selected size when product changes
+  useEffect(() => {
+    if (product.prices && product.prices.length > 0) {
+      setSelectedSize(product.prices[0].size);
+    }
+  }, [product]);
 
   const getProductName = () => {
     // Names are not translated, always return the English name
@@ -46,26 +59,21 @@ export function ProductCard({ product, language }: ProductCardProps) {
     }
   };
 
-  const isBeerWithSizes =
-    product.metadata?.beer &&
-    product.metadata.beer.size033ml &&
-    product.metadata.beer.size050ml;
+  const hasSizes = product.prices && product.prices.length > 0;
 
-  // Calculate display price based on selected size for beers
+  // Calculate display price based on selected size
   const getDisplayPrice = () => {
-    if (isBeerWithSizes) {
-      const beerMeta = product.metadata!.beer!;
-      if (selectedSize === '0.33' && beerMeta.size033ml) {
-        return beerMeta.size033ml;
-      } else if (selectedSize === '0.50' && beerMeta.size050ml) {
-        return beerMeta.size050ml;
+    if (hasSizes && selectedSize) {
+      const selectedPrice = product.prices!.find(p => p.size === selectedSize);
+      if (selectedPrice) {
+        return selectedPrice.price;
       }
     }
     return product.price;
   };
 
   const handleAddToCart = () => {
-    if (isBeerWithSizes) {
+    if (hasSizes && selectedSize) {
       addItem(product, selectedSize);
     } else {
       addItem(product);
@@ -104,27 +112,22 @@ export function ProductCard({ product, language }: ProductCardProps) {
           </div>
         )}
 
-        {/* Beer Size Selection */}
-        {isBeerWithSizes && (
+        {/* Dynamic Size Selection */}
+        {hasSizes && (
           <div className="mt-3 mb-2">
             <p className="text-sm font-medium mb-2">{t.selectSize}:</p>
-            <div className="flex flex-row gap-2">
-              <Button
-                variant={selectedSize === '0.33' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedSize('0.33')}
-                className="flex-1 min-h-[44px] whitespace-normal h-auto py-2 text-xs"
-              >
-                0.33L - {formatPrice(product.metadata!.beer!.size033ml!)}
-              </Button>
-              <Button
-                variant={selectedSize === '0.50' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedSize('0.50')}
-                className="flex-1 min-h-[44px] whitespace-normal h-auto py-2 text-xs"
-              >
-                0.50L - {formatPrice(product.metadata!.beer!.size050ml!)}
-              </Button>
+            <div className="flex flex-row flex-wrap gap-2">
+              {product.prices!.map((priceOption) => (
+                <Button
+                  key={priceOption.id}
+                  variant={selectedSize === priceOption.size ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedSize(priceOption.size)}
+                  className="flex-1 min-h-[44px] whitespace-normal h-auto py-2 text-xs"
+                >
+                  {priceOption.size} - {formatPrice(priceOption.price)}
+                </Button>
+              ))}
             </div>
           </div>
         )}

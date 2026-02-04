@@ -20,12 +20,10 @@ export function generateWhatsAppMessage(
 
     // Calculate item price based on selected size for beers
     let itemPrice = product.price;
-    if (selectedSize && product.metadata?.beer) {
-      const beerMeta = product.metadata.beer;
-      if (selectedSize === '0.33' && beerMeta.size033ml) {
-        itemPrice = beerMeta.size033ml;
-      } else if (selectedSize === '0.50' && beerMeta.size050ml) {
-        itemPrice = beerMeta.size050ml;
+    if (selectedSize && product.prices && product.prices.length > 0) {
+      const sizePrice = product.prices.find(p => p.size === selectedSize);
+      if (sizePrice) {
+        itemPrice = sizePrice.price;
       }
     }
 
@@ -38,12 +36,10 @@ export function generateWhatsAppMessage(
   // Add total
   const total = cartItems.reduce((sum, item) => {
     let itemPrice = item.product.price;
-    if (item.selectedSize && item.product.metadata?.beer) {
-      const beerMeta = item.product.metadata.beer;
-      if (item.selectedSize === '0.33' && beerMeta.size033ml) {
-        itemPrice = beerMeta.size033ml;
-      } else if (item.selectedSize === '0.50' && beerMeta.size050ml) {
-        itemPrice = beerMeta.size050ml;
+    if (item.selectedSize && item.product.prices && item.product.prices.length > 0) {
+      const sizePrice = item.product.prices.find(p => p.size === item.selectedSize);
+      if (sizePrice) {
+        itemPrice = sizePrice.price;
       }
     }
     return sum + itemPrice * item.quantity;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase, isMissingConfig } from './supabase';
-import type { Product, Category } from '@/types/menu';
+import type { Product, Category, ProductPrice } from '@/types/menu';
 
 // ==========================================
 // Supabase DB types (match actual schema)
@@ -77,10 +77,15 @@ function getCategoryIcon(slug: string): string {
  * Convert DB menu item to frontend Product type for cart compatibility
  */
 export function toFrontendProduct(db: DbMenuItem, categorySlug: string): Product {
-    // Extract prices for beer sizes
-    const price033 = db.price_per_size.find(p => p.size === '0.33L')?.price;
-    const price050 = db.price_per_size.find(p => p.size === '0.50L')?.price;
-    const defaultPrice = db.price_per_size[0]?.price ?? 0;
+    // Map prices
+    const prices: ProductPrice[] = db.price_per_size.map(p => ({
+        id: p.id,
+        size: p.size,
+        price: p.price,
+    })).sort((a, b) => a.price - b.price); // Sort by price usually makes sense
+
+    // Default price is the lowest price or 0 if no prices
+    const defaultPrice = prices.length > 0 ? prices[0].price : 0;
 
     // Extract metadata (ibu, abv, wine info)
     const meta = db.metadata as Record<string, unknown> | null;
@@ -94,13 +99,12 @@ export function toFrontendProduct(db: DbMenuItem, categorySlug: string): Product
         price: defaultPrice,
         category: categorySlug as Product['category'],
         subcategory: db.subcategory ?? undefined,
-        metadata: buildProductMetadata(price033, price050, ibu, abv, meta),
+        metadata: buildProductMetadata(ibu, abv, meta),
+        prices: prices.length > 0 ? prices : undefined,
     };
 }
 
 function buildProductMetadata(
-    price033?: number,
-    price050?: number,
     ibu?: number,
     abv?: number,
     meta?: Record<string, unknown> | null
@@ -108,12 +112,10 @@ function buildProductMetadata(
     const result: Product['metadata'] = {};
 
     // Beer metadata
-    if (ibu !== undefined || abv !== undefined || price033 || price050) {
+    if (ibu !== undefined || abv !== undefined) {
         result.beer = {
             ibu: ibu ?? 0,
             abv: abv ?? 0,
-            size033ml: price033,
-            size050ml: price050,
         };
     }
 

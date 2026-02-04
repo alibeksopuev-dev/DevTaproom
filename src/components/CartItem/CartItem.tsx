@@ -40,12 +40,11 @@ export function CartItem({ item, language }: CartItemProps) {
 
   // Calculate item price based on selected size for beers
   let itemPrice = item.product.price;
-  if (item.selectedSize && item.product.metadata?.beer) {
-    const beerMeta = item.product.metadata.beer;
-    if (item.selectedSize === '0.33' && beerMeta.size033ml) {
-      itemPrice = beerMeta.size033ml;
-    } else if (item.selectedSize === '0.50' && beerMeta.size050ml) {
-      itemPrice = beerMeta.size050ml;
+
+  if (item.selectedSize && item.product.prices && item.product.prices.length > 0) {
+    const sizePrice = item.product.prices.find(p => p.size === item.selectedSize);
+    if (sizePrice) {
+      itemPrice = sizePrice.price;
     }
   }
 
@@ -60,7 +59,7 @@ export function CartItem({ item, language }: CartItemProps) {
               <h3 className="font-semibold text-gray-900">{getProductName()}</h3>
               {item.selectedSize && (
                 <Badge variant="outline" className="mt-1 text-xs">
-                  {t.size}: {item.selectedSize}L
+                  {t.size}: {item.selectedSize}
                 </Badge>
               )}
             </div>

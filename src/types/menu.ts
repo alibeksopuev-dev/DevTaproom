@@ -3,8 +3,7 @@ export type CategoryId = 'beers' | 'snacks' | 'drinks' | 'wines' | 'bottles';
 export interface BeerMetadata {
   ibu: number;
   abv: number;
-  size033ml?: number; // price for 0.33L
-  size050ml?: number; // price for 0.50L
+  // Sizes are now handled via prices array in Product
 }
 
 export interface WineMetadata {
@@ -20,6 +19,12 @@ export interface ProductMetadata {
   tags?: string[];
 }
 
+export interface ProductPrice {
+  id: string;
+  size: string;
+  price: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -30,13 +35,14 @@ export interface Product {
   descriptionVi?: string;
   descriptionJa?: string;
   descriptionKo?: string;
-  price: number; // in VND (thousands)
+  price: number; // in VND
   category: CategoryId;
   metadata?: ProductMetadata;
   subcategory?: string;
+  prices?: ProductPrice[];
 }
 
-export type BeerSize = '0.33' | '0.50';
+export type BeerSize = string; // Was '0.33' | '0.50', now dynamic string
 
 export interface CartItem {
   product: Product;
