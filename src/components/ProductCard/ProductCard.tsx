@@ -100,56 +100,82 @@ export function ProductCard({ product, language }: ProductCardProps) {
           {getProductDescription()}
         </p>
 
-        {/* Beer Metadata */}
-        {product.metadata?.beer && (
+        {/* Metadata - Generic renderer for all custom fields */}
+        {product.metadata && (
           <div className={productMetadataStyles()}>
-            <span className={metadataBadgeStyles()}>
-              IBU {product.metadata.beer.ibu}
-            </span>
-            <span className={metadataBadgeStyles()}>
-              ABV {product.metadata.beer.abv}%
-            </span>
+            {/* Beer metadata: IBU and ABV */}
+            {product.metadata.beer && (
+              <>
+                {product.metadata.beer.ibu > 0 && (
+                  <span className={metadataBadgeStyles()}>
+                    IBU {product.metadata.beer.ibu}
+                  </span>
+                )}
+                {product.metadata.beer.abv > 0 && (
+                  <span className={metadataBadgeStyles()}>
+                    ABV {product.metadata.beer.abv}%
+                  </span>
+                )}
+              </>
+            )}
+
+            {/* Wine metadata: country, region, grapeVariety, style */}
+            {product.metadata.wine && (
+              <>
+                {product.metadata.wine.country && (
+                  <span className={metadataBadgeStyles()}>
+                    {product.metadata.wine.country}
+                  </span>
+                )}
+                {product.metadata.wine.region && (
+                  <span className={metadataBadgeStyles()}>
+                    {product.metadata.wine.region}
+                  </span>
+                )}
+                {product.metadata.wine.grapeVariety && (
+                  <span className={metadataBadgeStyles()}>
+                    {product.metadata.wine.grapeVariety}
+                  </span>
+                )}
+                {product.metadata.wine.style && (
+                  <span className={metadataBadgeStyles()}>
+                    {product.metadata.wine.style}
+                  </span>
+                )}
+              </>
+            )}
+
+            {/* Tags */}
+            {product.metadata.tags && product.metadata.tags.map((tag, idx) => (
+              <span key={idx} className={metadataBadgeStyles()}>
+                {tag}
+              </span>
+            ))}
           </div>
         )}
 
-        {/* Dynamic Size Selection */}
-        {hasSizes && (
-          <div className="mt-3 mb-2">
-            <p className="text-sm font-medium mb-2">{t.selectSize}:</p>
-            <div className="flex flex-row flex-wrap gap-2">
-              {product.prices!.map((priceOption) => (
-                <Button
-                  key={priceOption.id}
-                  variant={selectedSize === priceOption.size ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedSize(priceOption.size)}
-                  className="flex-1 min-h-[44px] whitespace-normal h-auto py-2 text-xs"
-                >
-                  {priceOption.size} - {formatPrice(priceOption.price)}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Wine Metadata */}
-        {product.metadata?.wine && (
+        {/* Raw custom metadata - render any other fields not handled above */}
+        {product.rawMetadata && (
           <div className={productMetadataStyles()}>
-            {product.metadata.wine.country && (
-              <span className={metadataBadgeStyles()}>
-                {product.metadata.wine.country}
-              </span>
-            )}
-            {product.metadata.wine.region && (
-              <span className={metadataBadgeStyles()}>
-                {product.metadata.wine.region}
-              </span>
-            )}
-            {product.metadata.wine.grapeVariety && (
-              <span className={metadataBadgeStyles()}>
-                {product.metadata.wine.grapeVariety}
-              </span>
-            )}
+            {Object.entries(product.rawMetadata).map(([key, value]) => {
+              // Skip fields that are already rendered in structured metadata
+              const skipFields = new Set(['ibu', 'abv', 'region', 'country', 'grapeVariety', 'grape_variety', 'style', 'wine_region', 'wine_country', 'wine_style', 'tags']);
+
+              if (skipFields.has(key) || value === null || value === undefined) {
+                return null;
+              }
+
+              // Format the display value
+              const displayValue = typeof value === 'object'
+                ? JSON.stringify(value)
+                : String(value);
+
+              return (
+                <span key={key} className={metadataBadgeStyles()}>
+                  {key}: {displayValue}
+                </span>
+              );
+            })}
           </div>
         )}
 

@@ -38,6 +38,7 @@ export interface Product {
   price: number; // in VND
   category: CategoryId;
   metadata?: ProductMetadata;
+  rawMetadata?: Record<string, unknown>; // All metadata from admin panel
   subcategory?: string;
   prices?: ProductPrice[];
 }

@@ -100,6 +100,7 @@ export function toFrontendProduct(db: DbMenuItem, categorySlug: string): Product
         category: categorySlug as Product['category'],
         subcategory: db.subcategory ?? undefined,
         metadata: buildProductMetadata(ibu, abv, meta),
+        rawMetadata: meta || undefined, // Pass through all raw metadata
         prices: prices.length > 0 ? prices : undefined,
     };
 }
@@ -111,21 +112,45 @@ function buildProductMetadata(
 ): Product['metadata'] {
     const result: Product['metadata'] = {};
 
-    // Beer metadata
-    if (ibu !== undefined || abv !== undefined) {
+    // Parse numeric values if stored as strings
+    const parseNumber = (value: unknown): number | undefined => {
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') {
+            const parsed = parseFloat(value);
+            return isNaN(parsed) ? undefined : parsed;
+        }
+        return undefined;
+    };
+
+    // Beer metadata - support both direct params and metadata object
+    const ibuValue = ibu ?? parseNumber(meta?.ibu);
+    const abvValue = abv ?? parseNumber(meta?.abv);
+
+    if (ibuValue !== undefined || abvValue !== undefined) {
         result.beer = {
-            ibu: ibu ?? 0,
-            abv: abv ?? 0,
+            ibu: ibuValue ?? 0,
+            abv: abvValue ?? 0,
         };
     }
 
-    // Wine metadata (if present)
-    if (meta?.wine_region || meta?.wine_country || meta?.wine_style) {
+    // Wine metadata - support both old and new field names
+    const region = (meta?.region || meta?.wine_region) as string | undefined;
+    const country = (meta?.country || meta?.wine_country) as string | undefined;
+    const grapeVariety = (meta?.grapeVariety || meta?.grape_variety) as string | undefined;
+    const style = (meta?.style || meta?.wine_style) as string | undefined;
+
+    if (region || country || grapeVariety || style) {
         result.wine = {
-            region: (meta.wine_region as string) ?? '',
-            country: (meta.wine_country as string) ?? '',
-            style: (meta.wine_style as string) ?? undefined,
+            region: region ?? '',
+            country: country ?? '',
+            grapeVariety: grapeVariety,
+            style: style,
         };
+    }
+
+    // Tags (if present)
+    if (meta?.tags && Array.isArray(meta.tags)) {
+        result.tags = meta.tags as string[];
     }
 
     return Object.keys(result).length > 0 ? result : undefined;
