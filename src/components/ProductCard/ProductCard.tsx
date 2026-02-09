@@ -179,6 +179,26 @@ export function ProductCard({ product, language }: ProductCardProps) {
           </div>
         )}
 
+        {/* Size Selection */}
+        {hasSizes && (
+          <div className="mt-1 mb-3">
+            <p className="text-sm font-medium mb-2">{t.selectSize}:</p>
+            <div className="flex flex-row flex-wrap gap-2">
+              {product.prices!.map((priceOption) => (
+                <Button
+                  key={priceOption.id}
+                  variant={selectedSize === priceOption.size ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedSize(priceOption.size)}
+                  className="flex-1 min-h-[44px] whitespace-normal h-auto py-2 text-xs"
+                >
+                  {priceOption.size} - {formatPrice(priceOption.price)}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="mt-auto flex items-center justify-between gap-3 flex-wrap">
           <span className={productPriceStyles()}>{formatPrice(getDisplayPrice())}</span>
           <Button
