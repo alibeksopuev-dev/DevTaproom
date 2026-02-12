@@ -180,11 +180,11 @@ export function ProductCard({ product, language }: ProductCardProps) {
         )}
 
         {/* Size Selection */}
-        {hasSizes && (
+        {product.prices && product.prices.length > 0 && selectedSize && (
           <div className="mt-1 mb-3">
             <p className="text-sm font-medium mb-2">{t.selectSize}:</p>
             <div className="flex flex-row flex-wrap gap-2">
-              {product.prices!.map((priceOption) => (
+              {product.prices.map((priceOption) => (
                 <Button
                   key={priceOption.id}
                   variant={selectedSize === priceOption.size ? 'default' : 'outline'}
