@@ -4,12 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher/LanguageSwitcher';
 import { useCartStore } from '@/lib/store';
-import logo from '@/assets/eightyone.png';
+import logo from '@/assets/81logo.png';
+import { useGetOrganizationByIdQuery } from '@/entities/organizations/api';
+import { ORGANIZATION_ID } from '@/lib/constants';
 
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const itemCount = useCartStore((state) => state.getItemCount());
+
+  const { data: organization } = useGetOrganizationByIdQuery(ORGANIZATION_ID);
 
   const isHome = location.pathname === '/';
 
@@ -40,7 +44,11 @@ export function Header() {
           {/* Center: Title */}
           <Link to="/" className="flex-1 text-center">
             <div className="flex justify-center">
-              <img src={logo} alt="81 Taproom" className="h-8 w-40 object-contain" />
+              <img
+                src={organization?.logo_url || logo}
+                alt={organization?.name || "81 Taproom"}
+                className="h-8 w-40 object-contain"
+              />
             </div>
           </Link>
 
