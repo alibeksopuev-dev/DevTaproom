@@ -4,29 +4,36 @@ import { Button } from '@/components/ui/button';
 import { useUIStore } from '@/lib/store';
 import { getTranslation } from '@/lib/i18n/translations';
 
-export function SearchBar() {
-  const { language, searchQuery, setSearchQuery } = useUIStore();
+interface SearchBarProps {
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+export function SearchBar({ value = '', onChange, placeholder, className }: SearchBarProps) {
+  const { language } = useUIStore();
   const t = getTranslation(language);
 
   const handleClear = () => {
-    setSearchQuery('');
+    onChange?.('');
   };
 
   return (
-    <div className="relative">
+    <div className={`relative ${className || ''}`}>
       <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
         <Search size={18} className="text-gray-400" />
       </div>
 
       <Input
         type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder={t.searchPlaceholder}
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        placeholder={placeholder || t.searchPlaceholder}
         className="pl-10 pr-10 h-12 text-base"
       />
 
-      {searchQuery && (
+      {value && (
         <Button
           variant="ghost"
           size="sm"

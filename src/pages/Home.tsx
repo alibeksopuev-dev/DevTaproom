@@ -1,21 +1,66 @@
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header/Header';
 import { CategoryButton } from '@/components/CategoryButton/CategoryButton';
 import { SearchBar } from '@/components/SearchBar/SearchBar';
 import { ProductCard } from '@/components/ProductCard/ProductCard';
 import { useUIStore } from '@/lib/store';
-import { useMenu } from '@/lib/useMenu';
 import { getTranslation } from '@/lib/i18n/translations';
 import { Wifi, Copy, Check, Loader2 } from 'lucide-react';
-import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { useGetCategoriesQuery, useGetMenuItemsQuery } from '@/entities/menuItems/api';
+import { toFrontendCategory, toFrontendProduct } from '@/lib/useMenu';
 
 export function Home() {
-  const { language, searchQuery } = useUIStore();
+  const { language } = useUIStore();
   const t = getTranslation(language);
   const [copied, setCopied] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Fetch data from Supabase
-  const { categories, menuItems, isLoading, error } = useMenu();
+  // Search state
+  const searchQuery = searchParams.get('search') || '';
+  const [inputValue, setInputValue] = useState(searchQuery);
+
+  // Sync input with URL (for back navigation)
+  useEffect(() => {
+    setInputValue(searchQuery);
+  }, [searchQuery]);
+
+  // Debounce search update
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (inputValue !== searchQuery) {
+        if (inputValue) {
+          setSearchParams({ search: inputValue });
+        } else {
+          searchParams.delete('search');
+          setSearchParams(searchParams);
+        }
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(handler);
+  }, [inputValue, setSearchParams, searchParams, searchQuery]);
+
+  // Fetch Categories
+  const { data: categoriesData, isLoading: categoriesLoading, error: categoriesError } = useGetCategoriesQuery();
+
+  // Fetch Menu Items (only if searching)
+  const isSearching = !!searchQuery;
+  const {
+    data: searchResultsData,
+    isLoading: searchLoading,
+    error: searchError
+  } = useGetMenuItemsQuery({
+    limit: 50,
+    offset: 0,
+    filters: {
+      name: searchQuery,
+      is_disabled: false
+    }
+  }, {
+    skip: !isSearching
+  });
 
   const copyWifiPassword = () => {
     navigator.clipboard.writeText('asanaki81');
@@ -23,42 +68,34 @@ export function Home() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Sort categories by order
+  // Transform and sort categories
   const sortedCategories = useMemo(() =>
-    [...categories].sort((a, b) => a.order - b.order),
-    [categories]
+    (categoriesData || [])
+      .map((cat, idx) => toFrontendCategory(cat, idx))
+      .sort((a, b) => a.order - b.order),
+    [categoriesData]
   );
 
-  // Filter products based on search query
-  const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return [];
+  // Transform search results
+  const searchResults = useMemo(() => {
+    if (!searchResultsData?.items) return [];
+    return searchResultsData.items.map(item => {
+      const categorySlug = item.category?.slug ?? 'unknown';
+      return toFrontendProduct(item, categorySlug);
+    });
+  }, [searchResultsData]);
 
-    const query = searchQuery.toLowerCase();
-    return menuItems.filter((product) =>
-      product.name.toLowerCase().includes(query) ||
-      product.description.toLowerCase().includes(query)
-    );
-  }, [menuItems, searchQuery]);
+  const error = categoriesError || searchError;
 
-  const showSearchResults = searchQuery.trim().length > 0;
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-      </div>
-    );
-  }
-
-  // Error state
   if (error) {
+    const errorMessage = 'status' in error ? `Error ${error.status}: ${JSON.stringify((error as any).data)}` : error.message;
+
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <main className="max-w-4xl mx-auto px-4 py-6">
           <div className="text-center py-12">
-            <p className="text-red-600">Failed to load menu: {error}</p>
+            <p className="text-red-600">Failed to load menu: {errorMessage}</p>
           </div>
         </main>
       </div>
@@ -72,38 +109,53 @@ export function Home() {
       <main className="max-w-4xl mx-auto px-4 py-6">
         {/* Search Bar */}
         <div className="mb-6">
-          <SearchBar />
+          <SearchBar
+            value={inputValue}
+            onChange={setInputValue}
+            placeholder={t.searchPlaceholder}
+          />
         </div>
 
-        {showSearchResults ? (
+        {isSearching ? (
           /* Search Results */
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'result' : 'results'}
+              {searchLoading ? 'Searching...' : `${searchResults.length} ${searchResults.length === 1 ? 'result' : 'results'}`}
             </h2>
-            {filteredProducts.length > 0 ? (
+
+            {searchLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+              </div>
+            ) : searchResults.length > 0 ? (
               <div className="grid gap-4">
-                {filteredProducts.map((product) => (
+                {searchResults.map((product) => (
                   <ProductCard key={product.id} product={product} language={language} />
                 ))}
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-500">No products found</p>
+                <p className="text-gray-500">No products found for "{searchQuery}"</p>
               </div>
             )}
           </div>
         ) : (
           /* Categories Grid */
-          <div className="flex flex-col border-t border-[#C9C6C6] mb-4">
-            {sortedCategories.map((category) => (
-              <CategoryButton
-                key={category.id}
-                category={category}
-                language={language}
-              />
-            ))}
-          </div>
+          categoriesLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            </div>
+          ) : (
+            <div className="flex flex-col border-t border-[#C9C6C6] mb-4">
+              {sortedCategories.map((category) => (
+                <CategoryButton
+                  key={category.id}
+                  category={category}
+                  language={language}
+                />
+              ))}
+            </div>
+          )
         )}
 
         <div className="flex flex-col items-center gap-2 mt-4">

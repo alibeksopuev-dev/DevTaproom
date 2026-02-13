@@ -1,60 +1,96 @@
-import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useMemo, useState, useEffect } from 'react';
 import { Header } from '@/components/Header/Header';
 import { SearchBar } from '@/components/SearchBar/SearchBar';
 import { ProductCard } from '@/components/ProductCard/ProductCard';
 import { useUIStore } from '@/lib/store';
-import { useMenuByCategory } from '@/lib/useMenu';
 import { Loader2 } from 'lucide-react';
+import { useGetCategoriesQuery, useGetMenuItemsQuery } from '@/entities/menuItems/api';
+import { toFrontendCategory, toFrontendProduct } from '@/lib/useMenu';
+import type { Product } from '@/types/menu';
+import { getTranslation } from '@/lib/i18n/translations';
 
 export function CategoryView() {
-  const { categoryId } = useParams<{ categoryId: string }>();
-  const { language, searchQuery } = useUIStore();
+  const { categoryId: categorySlug } = useParams<{ categoryId: string }>();
+  const navigate = useNavigate();
+  const { language } = useUIStore();
+  const t = getTranslation(language);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Fetch data from Supabase
-  const { category, items, isLoading, error } = useMenuByCategory(categoryId ?? '');
+  // Search state
+  const searchQuery = searchParams.get('search') || '';
+  const [inputValue, setInputValue] = useState(searchQuery);
 
-  // Filter by search query
-  const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return items;
+  // Sync input with URL
+  useEffect(() => {
+    setInputValue(searchQuery);
+  }, [searchQuery]);
 
-    const query = searchQuery.toLowerCase();
-    return items.filter(
-      (product) =>
-        product.name.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query) ||
-        product.subcategory?.toLowerCase().includes(query)
-    );
-  }, [items, searchQuery]);
-
-  // Group filtered products by subcategory
-  const filteredGroupedProducts = useMemo(() => {
-    const groups: Record<string, typeof filteredProducts> = {};
-
-    filteredProducts.forEach((product) => {
-      const key = product.subcategory || 'main';
-      if (!groups[key]) {
-        groups[key] = [];
+  // Debounce search update
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (inputValue !== searchQuery) {
+        if (inputValue) {
+          setSearchParams({ search: inputValue });
+        } else {
+          searchParams.delete('search');
+          setSearchParams(searchParams);
+        }
       }
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [inputValue, setSearchParams, searchParams, searchQuery]);
+
+  // 1. Fetch Categories to resolve slug -> id
+  const { data: categoriesData, isLoading: categoriesLoading } = useGetCategoriesQuery();
+
+  const { category, categoryId } = useMemo(() => {
+    if (!categoriesData || !categorySlug) return { category: null, categoryId: null };
+    const found = categoriesData.find(c => c.slug === categorySlug);
+    return {
+      category: found ? toFrontendCategory(found, 0) : null,
+      categoryId: found?.id // Actual UUID
+    };
+  }, [categoriesData, categorySlug]);
+
+  // 2. Fetch Items for this category
+  const {
+    data: menuItemsData,
+    isLoading: itemsLoading,
+    error: itemsError
+  } = useGetMenuItemsQuery({
+    limit: 100,
+    offset: 0,
+    filters: {
+      category_id: categoryId ?? undefined, // Supabase ID
+      is_disabled: false,
+      name: searchQuery // Filter by name within category
+    }
+  }, {
+    skip: !categoryId
+  });
+
+  // Transform items
+  const products = useMemo(() => {
+    if (!menuItemsData?.items || !categorySlug) return [];
+    return menuItemsData.items.map(item => toFrontendProduct(item, categorySlug));
+  }, [menuItemsData, categorySlug]);
+
+  // Group by subcategory
+  const groupedProducts = useMemo(() => {
+    const groups: Record<string, Product[]> = {};
+    products.forEach(product => {
+      const key = product.subcategory || 'Main';
+      if (!groups[key]) groups[key] = [];
       groups[key].push(product);
     });
-
     return groups;
-  }, [filteredProducts]);
+  }, [products]);
 
-  const getCategoryName = () => {
-    if (!category) return '';
-    switch (language) {
-      case 'vi':
-        return category.nameVi;
-      case 'ja':
-        return category.nameJa;
-      default:
-        return category.name;
-    }
-  };
+  const isLoading = categoriesLoading || itemsLoading;
+  const error = itemsError;
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -63,28 +99,14 @@ export function CategoryView() {
     );
   }
 
-  // Error state
-  if (error) {
+  if (error || !category) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <main className="max-w-4xl mx-auto px-4 py-6">
-          <div className="text-center py-12">
-            <p className="text-red-600">Failed to load menu: {error}</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (!category) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="max-w-4xl mx-auto px-4 py-6">
-          <div className="text-center">
-            <p className="text-gray-600">Category not found</p>
-          </div>
+        <main className="max-w-4xl mx-auto px-4 py-6 text-center">
+          <p className="text-red-500">
+            {!category ? 'Category not found' : 'Failed to load items'}
+          </p>
         </main>
       </div>
     );
@@ -95,48 +117,40 @@ export function CategoryView() {
       <Header />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
-        {/* Category Title */}
         <h2 className="text-2xl font-bold text-gray-900 uppercase tracking-wide mb-4">
-          {getCategoryName()}
+          {category.name}
         </h2>
-
         {/* Search Bar */}
         <div className="mb-6">
-          <SearchBar />
+          <SearchBar
+              value={inputValue}
+              onChange={setInputValue}
+              placeholder={t.searchPlaceholder}
+          />
         </div>
 
-        {/* Products */}
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">
-              {searchQuery
-                ? `No results found for "${searchQuery}"`
-                : 'No products in this category'}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {Object.entries(filteredGroupedProducts).map(([subcategory, products]) => (
-              <div key={subcategory}>
-                {subcategory !== 'main' && (
-                  <h3 className="text-lg font-semibold text-gray-700 uppercase tracking-wide mb-4 border-b border-gray-200 pb-2">
-                    {subcategory}
-                  </h3>
-                )}
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {products.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      language={language}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="space-y-8">
+          {products.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">
+                {searchQuery ? (t as any).noResults || 'No results found' : 'No items in this category'}
+              </p>
+          ) : (
+              Object.entries(groupedProducts).map(([subcategory, items]) => (
+                  <div key={subcategory}>
+                    {subcategory !== 'Main' && (
+                        <h2 className="text-lg font-semibold text-gray-700 mb-3 px-1">
+                          {subcategory}
+                        </h2>
+                    )}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {items.map((product) => (
+                          <ProductCard key={product.id} product={product} language={language}/>
+                      ))}
+                    </div>
+                  </div>
+              ))
+          )}
+        </div>
       </main>
     </div>
   );
