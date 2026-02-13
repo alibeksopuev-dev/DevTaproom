@@ -88,7 +88,8 @@ export function Home() {
   const error = categoriesError || searchError;
 
   if (error) {
-    const errorMessage = 'status' in error ? `Error ${error.status}: ${JSON.stringify((error as any).data)}` : error.message;
+    const err = error as any;
+    const errorMessage = 'status' in err ? `Error ${err.status}: ${JSON.stringify(err.data)}` : err.message;
 
     return (
       <div className="min-h-screen bg-gray-50">

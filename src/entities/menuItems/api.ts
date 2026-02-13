@@ -1,7 +1,7 @@
 import { baseApi } from '@/shared/api/baseApi';
 import { supabase } from '@/lib/supabase';
 import type { DbMenuItem, DbCategory } from '@/lib/useMenu';
-import type { Product, Category } from '@/types/menu';
+
 
 export type MenuItemFilters = {
     organization_id?: string;

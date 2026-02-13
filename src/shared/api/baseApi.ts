@@ -17,7 +17,7 @@ type SupabaseQueryArgs<T = any> = {
 
 export const supabaseBaseQuery = () => async (args: SupabaseQueryArgs) => {
     try {
-        const { table, select = '*', filter, single, order, range, id, data, method = 'select' } = args;
+        const { table, select = '*', filter, single, order, range, id, method = 'select' } = args;
 
         let query = supabase.from(table);
 

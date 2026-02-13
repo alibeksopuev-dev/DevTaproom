@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useMemo, useState, useEffect } from 'react';
 import { Header } from '@/components/Header/Header';
 import { SearchBar } from '@/components/SearchBar/SearchBar';
@@ -12,7 +12,7 @@ import { getTranslation } from '@/lib/i18n/translations';
 
 export function CategoryView() {
   const { categoryId: categorySlug } = useParams<{ categoryId: string }>();
-  const navigate = useNavigate();
+
   const { language } = useUIStore();
   const t = getTranslation(language);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -123,32 +123,32 @@ export function CategoryView() {
         {/* Search Bar */}
         <div className="mb-6">
           <SearchBar
-              value={inputValue}
-              onChange={setInputValue}
-              placeholder={t.searchPlaceholder}
+            value={inputValue}
+            onChange={setInputValue}
+            placeholder={t.searchPlaceholder}
           />
         </div>
 
         <div className="space-y-8">
           {products.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
-                {searchQuery ? (t as any).noResults || 'No results found' : 'No items in this category'}
-              </p>
+            <p className="text-center text-gray-500 py-8">
+              {searchQuery ? (t as any).noResults || 'No results found' : 'No items in this category'}
+            </p>
           ) : (
-              Object.entries(groupedProducts).map(([subcategory, items]) => (
-                  <div key={subcategory}>
-                    {subcategory !== 'Main' && (
-                        <h2 className="text-lg font-semibold text-gray-700 mb-3 px-1">
-                          {subcategory}
-                        </h2>
-                    )}
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {items.map((product) => (
-                          <ProductCard key={product.id} product={product} language={language}/>
-                      ))}
-                    </div>
-                  </div>
-              ))
+            Object.entries(groupedProducts).map(([subcategory, items]) => (
+              <div key={subcategory}>
+                {subcategory !== 'Main' && (
+                  <h2 className="text-lg font-semibold text-gray-700 mb-3 px-1">
+                    {subcategory}
+                  </h2>
+                )}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {items.map((product) => (
+                    <ProductCard key={product.id} product={product} language={language} />
+                  ))}
+                </div>
+              </div>
+            ))
           )}
         </div>
       </main>
