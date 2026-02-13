@@ -42,10 +42,27 @@ export interface DbMenuItem {
 // Conversion helpers: DB → Frontend types
 // ==========================================
 
+const CATEGORY_ORDER = [
+    'craft-beer',
+    'beers',
+    'snacks',
+    'drinks',
+    'wines',
+    'bottles-cans',
+    'bottles',
+    'cans-and-bottles'
+];
+
 /**
  * Convert DB category to frontend Category type
  */
 export function toFrontendCategory(db: DbCategory, index: number): Category {
+    let order = CATEGORY_ORDER.indexOf(db.slug);
+    // If not in the list, put it at the end, maintaining original relative order
+    if (order === -1) {
+        order = 100 + index;
+    }
+
     return {
         id: db.slug as Category['id'], // Use slug as category ID for routing
         name: db.name,
@@ -53,7 +70,7 @@ export function toFrontendCategory(db: DbCategory, index: number): Category {
         nameJa: db.name,
         nameKo: db.name,
         icon: getCategoryIcon(db.slug), // Derive icon from slug
-        order: index + 1,
+        order: order,
     };
 }
 
