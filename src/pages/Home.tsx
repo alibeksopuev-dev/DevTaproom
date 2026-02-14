@@ -72,7 +72,8 @@ export function Home() {
   const sortedCategories = useMemo(() =>
     (categoriesData || [])
       .map((cat, idx) => toFrontendCategory(cat, idx))
-      .sort((a, b) => a.order - b.order),
+      .sort((a, b) => a.order - b.order)
+      .map((cat, idx) => ({ ...cat, order: idx + 1 })),
     [categoriesData]
   );
 

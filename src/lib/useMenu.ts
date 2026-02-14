@@ -50,6 +50,7 @@ const CATEGORY_ORDER = [
     'wines',
     'bottles-cans',
     'bottles',
+    'cans',
     'cans-and-bottles'
 ];
 
