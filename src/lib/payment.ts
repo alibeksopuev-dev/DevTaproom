@@ -13,8 +13,8 @@
 // Bank configuration — update these with your actual bank details
 const VIETQR_CONFIG = {
     bankId: 'BIDV',                      // Bank code (MB = MBBank, VCB = Vietcombank, TCB = Techcombank, etc.)
-    accountNo: '8837245349',           // Your bank account number
-    accountName: 'SOPUEV ALIBEK ANDREEVICH',            // Account holder name (no diacritics)
+    accountNo: '8845478944',           // Your bank account number
+    accountName: 'MAMASHEVA AKYLAI',            // Account holder name (no diacritics)
     template: 'compact2',             // QR template: compact, compact2, qr_only, print
 };
 

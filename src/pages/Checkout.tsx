@@ -176,11 +176,11 @@ export function Checkout() {
                         </div>
 
                         {/* QR Code Image */}
-                        <div className="bg-white p-4 rounded-lg border-2 border-gray-100 inline-block mb-4">
+                        <div className="bg-white pt-4 rounded-lg border-2 border-gray-100 inline-block mb-4">
                             <img
                                 src={qrImageUrl}
                                 alt="VietQR Payment Code"
-                                className="w-64 mx-auto"
+                                className="mx-auto"
                                 loading="eager"
                             />
                         </div>
