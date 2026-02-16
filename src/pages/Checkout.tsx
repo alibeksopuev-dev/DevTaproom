@@ -171,7 +171,6 @@ export function Checkout() {
                     /* VietQR Code Display */
                     <Card className="p-6 text-center">
                         <div className="mb-4">
-                            <QrCode className="mx-auto h-10 w-10 text-blue-600 mb-2" />
                             <h3 className="text-lg font-semibold text-gray-900">{t.scanQRToPay}</h3>
                             <p className="text-sm text-gray-500 mt-1">{t.scanQRInstruction}</p>
                         </div>

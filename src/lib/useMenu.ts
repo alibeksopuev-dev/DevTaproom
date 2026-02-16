@@ -20,6 +20,7 @@ export interface DbCategory {
     organization_id: string;
     created_at: string;
     updated_at: string;
+    translations?: Record<string, Record<string, string>>;
 }
 
 export interface DbMenuItem {
@@ -36,6 +37,7 @@ export interface DbMenuItem {
     updated_at: string;
     price_per_size: DbPrice[];
     category?: DbCategory;
+    translations?: Record<string, Record<string, string>>;
 }
 
 // ==========================================
@@ -67,9 +69,9 @@ export function toFrontendCategory(db: DbCategory, index: number): Category {
     return {
         id: db.slug as Category['id'], // Use slug as category ID for routing
         name: db.name,
-        nameVi: db.name, // For now, English only (translations can be added later)
-        nameJa: db.name,
-        nameKo: db.name,
+        nameVi: db.translations?.vi?.name || db.name,
+        nameJa: db.translations?.ja?.name || db.name,
+        nameKo: db.translations?.ko?.name || db.name,
         icon: getCategoryIcon(db.slug), // Derive icon from slug
         order: order,
     };
@@ -114,6 +116,9 @@ export function toFrontendProduct(db: DbMenuItem, categorySlug: string): Product
         id: db.id,
         name: db.name,
         description: db.description ?? '',
+        descriptionVi: db.translations?.vi?.description,
+        descriptionJa: db.translations?.ja?.description,
+        descriptionKo: db.translations?.ko?.description,
         price: defaultPrice,
         category: categorySlug as Product['category'],
         subcategory: db.subcategory ?? undefined,

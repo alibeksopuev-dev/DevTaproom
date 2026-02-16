@@ -45,7 +45,7 @@ const en: Translation = {
   orSendViaWhatsApp: 'or send via WhatsApp',
   scanQRToPay: 'Scan QR to Pay',
   scanQRInstruction: 'Open your banking app and scan this QR code to transfer payment',
-  orderPlaced: 'Order Placed!',
+  orderPlaced: 'Order Placed',
   orderNumber: 'Order Number',
   orderStatus: 'Order Status',
   waitingForPayment: 'Waiting for payment...',
