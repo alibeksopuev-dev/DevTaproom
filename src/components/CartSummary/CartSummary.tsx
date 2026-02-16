@@ -1,10 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import type { Language } from '@/types/i18n';
 import { useCartStore } from '@/lib/store';
 import { getTranslation } from '@/lib/i18n/translations';
-import { sendToWhatsApp } from '@/lib/whatsapp';
 import { formatPrice } from '@/lib/utils';
 
 interface CartSummaryProps {
@@ -12,14 +12,15 @@ interface CartSummaryProps {
 }
 
 export function CartSummary({ language }: CartSummaryProps) {
-  const { items, orderNotes, setOrderNotes, getTotal, clearCart } = useCartStore();
+  const navigate = useNavigate();
+  const { items, orderNotes, setOrderNotes, getTotal } = useCartStore();
   const t = getTranslation(language);
 
   const total = getTotal();
 
-  const handleSendOrder = () => {
+  const handleCheckout = () => {
     if (items.length === 0) return;
-    sendToWhatsApp(items, orderNotes, language, clearCart);
+    navigate('/checkout');
   };
 
   return (
@@ -51,12 +52,12 @@ export function CartSummary({ language }: CartSummaryProps) {
         </div>
 
         <Button
-          onClick={handleSendOrder}
+          onClick={handleCheckout}
           disabled={items.length === 0}
           className="w-full min-h-[52px] text-base font-semibold"
           size="lg"
         >
-          {t.sendOrder}
+          {t.checkout}
         </Button>
       </div>
     </Card>

@@ -3,7 +3,8 @@ import { Analytics } from "@vercel/analytics/react"
 import { Home } from '@/pages/Home';
 import { CategoryView } from '@/pages/CategoryView';
 import { Cart } from '@/pages/Cart';
-import { RLSTest } from '@/pages/RLSTest';
+import { Checkout } from '@/pages/Checkout';
+import { OrderConfirmation } from '@/pages/OrderConfirmation';
 
 function App() {
   return (
@@ -12,7 +13,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/category/:categoryId" element={<CategoryView />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/rls-test" element={<RLSTest />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order/:orderId" element={<OrderConfirmation />} />
       </Routes>
       <Analytics />
     </Router>

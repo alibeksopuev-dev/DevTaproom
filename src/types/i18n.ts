@@ -46,6 +46,27 @@ export interface Translation {
   newOrder: string;
   notes: string;
 
+  // Payment / Checkout
+  checkout: string;
+  payWithVietQR: string;
+  orSendViaWhatsApp: string;
+  scanQRToPay: string;
+  scanQRInstruction: string;
+  orderPlaced: string;
+  orderNumber: string;
+  orderStatus: string;
+  waitingForPayment: string;
+  paymentConfirmed: string;
+  tableNumber: string;
+  tableNumberPlaceholder: string;
+  orderConfirmation: string;
+  orderConfirmedMessage: string;
+  viewOrderStatus: string;
+  backToMenu: string;
+  preparing: string;
+  ready: string;
+  completed: string;
+
   // Footer
   established: string;
   reviewsOn: string;
