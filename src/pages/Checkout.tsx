@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, QrCode, MessageCircle, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { QrCode, MessageCircle, Loader2 } from 'lucide-react';
 import { Header } from '@/components/Header/Header';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
