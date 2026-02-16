@@ -99,7 +99,7 @@ export function Checkout() {
                                         <div key={`${item.product.id}-${item.selectedSize}`} className="flex justify-between text-sm">
                                             <span className="text-gray-700">
                                                 {item.product.name}
-                                                {item.selectedSize ? ` (${item.selectedSize}L)` : ''}
+                                                {item.selectedSize ? ` (${item.selectedSize})` : ''}
                                                 {' × '}{item.quantity}
                                             </span>
                                             <span className="text-gray-900 font-medium">
