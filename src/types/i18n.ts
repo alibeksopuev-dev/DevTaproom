@@ -51,6 +51,7 @@ export interface Translation {
   payWithVietQR: string;
   orSendViaWhatsApp: string;
   scanQRToPay: string;
+  saveQR: string;
   scanQRInstruction: string;
   orderPlaced: string;
   orderNumber: string;

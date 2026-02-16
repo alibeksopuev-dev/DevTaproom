@@ -185,6 +185,30 @@ export function Checkout() {
                             />
                         </div>
 
+                        <div className="mb-4">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={async () => {
+                                    try {
+                                        const res = await fetch(qrImageUrl);
+                                        const blob = await res.blob();
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `${orderNumber}-qr.png`;
+                                        a.click();
+                                        URL.revokeObjectURL(url);
+                                    } catch {
+                                        window.open(qrImageUrl, '_blank');
+                                    }
+                                }}
+                            >
+                                <QrCode className="mr-1.5 h-4 w-4" />
+                                {t.saveQR}
+                            </Button>
+                        </div>
+
                         {/* Payment Details */}
                         <div className="text-left bg-gray-50 rounded-lg p-4 mb-4 space-y-2">
                             <div className="flex justify-between text-sm">
