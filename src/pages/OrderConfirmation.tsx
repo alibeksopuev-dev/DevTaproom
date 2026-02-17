@@ -128,7 +128,7 @@ export function OrderConfirmation() {
                     <div className="space-y-3">
                         <div className="flex justify-between">
                             <span className="text-sm text-gray-600">{t.orderNumber}</span>
-                            <span className="font-mono font-bold text-gray-900">{order.order_number}</span>
+                            <span className="text-gray-900 text-sm">{order.order_number}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-600">{t.orderStatus}</span>
@@ -156,17 +156,16 @@ export function OrderConfirmation() {
                 {order.items && order.items.length > 0 && (
                     <Card className="p-4 mb-4">
                         <h3 className="font-semibold text-gray-900 mb-3">{t.yourCart}</h3>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {order.items.map((item) => (
-                                <div key={item.id} className="flex justify-between text-sm">
-                                    <span className="text-gray-700">
+                                <div key={item.id} className="text-sm">
+                                    <div className="font-medium text-gray-900">
                                         {item.item_name}
-                                        {item.size ? ` (${item.size})` : ''}
-                                        {' × '}{item.quantity}
-                                    </span>
-                                    <span className="text-gray-900 font-medium">
-                                        {formatPrice(item.total_price)}
-                                    </span>
+                                    </div>
+                                    <div className="flex justify-between text-gray-500 mt-0.5">
+                                        <span>{item.size ? `${item.size} × ` : ''}{item.quantity}</span>
+                                        <span className="text-gray-900 font-medium">{formatPrice(item.total_price)}</span>
+                                    </div>
                                 </div>
                             ))}
                         </div>
