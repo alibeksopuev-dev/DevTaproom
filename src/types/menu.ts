@@ -41,6 +41,7 @@ export interface Product {
   rawMetadata?: Record<string, unknown>; // All metadata from admin panel
   subcategory?: string;
   prices?: ProductPrice[];
+  image_url?: string;
 }
 
 export type BeerSize = string; // Was '0.33' | '0.50', now dynamic string

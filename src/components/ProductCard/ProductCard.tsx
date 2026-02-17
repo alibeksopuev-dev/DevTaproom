@@ -1,4 +1,4 @@
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, ImageIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +33,7 @@ export function ProductCard({ product, language }: ProductCardProps) {
 
   const [selectedSize, setSelectedSize] = useState<BeerSize | undefined>(defaultSize);
   const [wasAdded, setWasAdded] = useState(false);
+  const [showImage, setShowImage] = useState(false);
 
   // Update selected size when product changes
   useEffect(() => {
@@ -42,7 +43,6 @@ export function ProductCard({ product, language }: ProductCardProps) {
   }, [product]);
 
   const getProductName = () => {
-    // Names are not translated, always return the English name
     return product.name;
   };
 
@@ -61,7 +61,6 @@ export function ProductCard({ product, language }: ProductCardProps) {
 
   const hasSizes = product.prices && product.prices.length > 0;
 
-  // Calculate display price based on selected size
   const getDisplayPrice = () => {
     if (hasSizes && selectedSize) {
       const selectedPrice = product.prices!.find(p => p.size === selectedSize);
@@ -83,10 +82,37 @@ export function ProductCard({ product, language }: ProductCardProps) {
     setTimeout(() => setWasAdded(false), 400);
   };
 
+  const hasImage = !!product.image_url;
+
   return (
     <Card className={productCardStyles()}>
       <div className="flex flex-col h-full">
-        <h3 className={productNameStyles()}>{getProductName()}</h3>
+        {/* Name row with optional photo toggle */}
+        <div className="flex items-start justify-between gap-2">
+          <h3 className={productNameStyles()}>{getProductName()}</h3>
+          {hasImage && (
+            <button
+              type="button"
+              onClick={() => setShowImage(!showImage)}
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors shrink-0 mt-0.5"
+            >
+              <ImageIcon size={14} />
+              <span className="underline underline-offset-2">{showImage ? 'Hide' : 'Photo'}</span>
+            </button>
+          )}
+        </div>
+
+        {/* Expandable image */}
+        {hasImage && showImage && (
+          <div className="mt-2 mb-3 rounded-lg overflow-hidden">
+            <img
+              src={product.image_url}
+              alt={product.name}
+              loading="lazy"
+              className="w-full h-48 object-cover rounded-lg"
+            />
+          </div>
+        )}
 
         {product.subcategory && (
           <div className="mb-2">

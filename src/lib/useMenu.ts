@@ -125,6 +125,7 @@ export function toFrontendProduct(db: DbMenuItem, categorySlug: string): Product
         metadata: buildProductMetadata(ibu, abv, meta),
         rawMetadata: meta || undefined, // Pass through all raw metadata
         prices: prices.length > 0 ? prices : undefined,
+        image_url: db.image_url ?? undefined,
     };
 }
 
