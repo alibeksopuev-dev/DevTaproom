@@ -44,7 +44,7 @@ const en: Translation = {
   payWithVietQR: 'Pay with VietQR',
   orSendViaWhatsApp: 'or send via WhatsApp',
   scanQRToPay: 'Scan QR to Pay',
-  saveQR: 'Save QR',
+  saveQR: 'Save QR to scan',
   scanQRInstruction: 'Open your banking app and scan this QR code to transfer payment',
   orderPlaced: 'Order Placed',
   orderNumber: 'Order Number',
