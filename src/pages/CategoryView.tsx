@@ -9,6 +9,7 @@ import { useGetCategoriesQuery, useGetMenuItemsQuery } from '@/entities/menuItem
 import { toFrontendCategory, toFrontendProduct } from '@/lib/useMenu';
 import type { Product } from '@/types/menu';
 import { getTranslation } from '@/lib/i18n/translations';
+import { FloatingCartBar } from '@/components/FloatingCartBar/FloatingCartBar';
 
 export function CategoryView() {
   const { categoryId: categorySlug } = useParams<{ categoryId: string }>();
@@ -152,6 +153,8 @@ export function CategoryView() {
           )}
         </div>
       </main>
+
+      <FloatingCartBar />
     </div>
   );
 }

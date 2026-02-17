@@ -10,6 +10,7 @@ import { Wifi, Copy, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGetCategoriesQuery, useGetMenuItemsQuery } from '@/entities/menuItems/api';
 import { toFrontendCategory, toFrontendProduct } from '@/lib/useMenu';
+import { FloatingCartBar } from '@/components/FloatingCartBar/FloatingCartBar';
 
 export function Home() {
   const { language } = useUIStore();
@@ -229,6 +230,8 @@ export function Home() {
           </div>
         </footer>
       </main>
+
+      <FloatingCartBar />
     </div>
   );
 }
