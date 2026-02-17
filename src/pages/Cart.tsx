@@ -18,7 +18,7 @@ export function Cart() {
 
       <main className="max-w-4xl mx-auto px-4 py-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          {t.yourCart}
+          {t.checkout}
         </h2>
 
         {items.length === 0 ? (

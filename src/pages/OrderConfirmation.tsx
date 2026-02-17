@@ -1,11 +1,12 @@
 import { Link, useParams } from 'react-router-dom';
-import { CheckCircle2, Clock, ChefHat, PackageCheck, Loader2 } from 'lucide-react';
+import { CheckCircle2, Clock, ChefHat, PackageCheck, Loader2, QrCode } from 'lucide-react';
 import { Header } from '@/components/Header/Header';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useUIStore } from '@/lib/store';
 import { getTranslation } from '@/lib/i18n/translations';
 import { formatPrice } from '@/lib/utils';
+import { generateVietQRUrl } from '@/lib/payment';
 import { useGetOrderByIdQuery } from '@/entities/orders/api';
 import type { OrderStatus } from '@/types/order';
 
@@ -60,6 +61,8 @@ export function OrderConfirmation() {
     const statusConfig = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
     const StatusIcon = statusConfig.icon;
     const isPaid = order.payment_status === 'paid';
+    const showQR = !isPaid && order.payment_method === 'vietqr';
+    const qrImageUrl = showQR ? generateVietQRUrl(order.total_amount, order.order_number) : '';
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -74,6 +77,51 @@ export function OrderConfirmation() {
                     </h2>
                     <p className="text-gray-500 text-sm">{t.orderConfirmedMessage}</p>
                 </Card>
+
+                {/* VietQR Payment */}
+                {showQR && (
+                    <Card className="p-6 text-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{t.scanQRToPay}</h3>
+                        <p className="text-sm text-gray-500 mb-4">{t.scanQRInstruction}</p>
+
+                        <div className="bg-white pt-4 rounded-lg border-2 border-gray-100 inline-block mb-4">
+                            <img
+                                src={qrImageUrl}
+                                alt="VietQR Payment Code"
+                                className="mx-auto"
+                                loading="eager"
+                            />
+                        </div>
+
+                        <div className="mb-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={async () => {
+                                    try {
+                                        const res = await fetch(qrImageUrl);
+                                        const blob = await res.blob();
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `${order.order_number}-qr.png`;
+                                        a.click();
+                                        URL.revokeObjectURL(url);
+                                    } catch {
+                                        window.open(qrImageUrl, '_blank');
+                                    }
+                                }}
+                            >
+                                <QrCode className="mr-1.5 h-4 w-4" />
+                                {t.saveQR}
+                            </Button>
+                        </div>
+
+                        <p className="text-xs text-gray-400 mt-2">
+                            {t.waitingForPayment}
+                        </p>
+                    </Card>
+                )}
 
                 {/* Order Info */}
                 <Card className="p-4 mb-4">

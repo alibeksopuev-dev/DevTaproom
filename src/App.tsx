@@ -3,7 +3,6 @@ import { Analytics } from "@vercel/analytics/react"
 import { Home } from '@/pages/Home';
 import { CategoryView } from '@/pages/CategoryView';
 import { Cart } from '@/pages/Cart';
-import { Checkout } from '@/pages/Checkout';
 import { OrderConfirmation } from '@/pages/OrderConfirmation';
 
 function App() {
@@ -13,7 +12,6 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/category/:categoryId" element={<CategoryView />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
         <Route path="/order/:orderId" element={<OrderConfirmation />} />
       </Routes>
       <Analytics />
