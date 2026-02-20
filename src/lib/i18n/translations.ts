@@ -68,6 +68,12 @@ const en: Translation = {
   wifiNetwork: 'WiFi: 81Taproom',
   wifiPassword: 'Password: asanaki81',
   copied: 'Copied!',
+
+  signIn: 'Sign in',
+  signOut: 'Sign out',
+  discount: 'off',
+  signInForDiscounts: 'Sign in with Google for possible discounts',
+  discountApplied: 'Discount applied',
 };
 
 const vi: Translation = {
@@ -138,6 +144,12 @@ const vi: Translation = {
   wifiNetwork: 'WiFi: 81Taproom',
   wifiPassword: 'Mật khẩu: asanaki81',
   copied: 'Đã sao chép!',
+
+  signIn: 'Đăng nhập',
+  signOut: 'Đăng xuất',
+  discount: 'giảm giá',
+  signInForDiscounts: 'Đăng nhập Google để nhận giảm giá',
+  discountApplied: 'Giảm giá áp dụng',
 };
 
 const ja: Translation = {
@@ -208,6 +220,12 @@ const ja: Translation = {
   wifiNetwork: 'WiFi: 81Taproom',
   wifiPassword: 'パスワード: asanaki81',
   copied: 'コピーしました！',
+
+  signIn: 'ログイン',
+  signOut: 'ログアウト',
+  discount: '割引',
+  signInForDiscounts: 'Googleでログインして割引をゲット',
+  discountApplied: '割引適用中',
 };
 
 const ko: Translation = {
@@ -278,6 +296,12 @@ const ko: Translation = {
   wifiNetwork: 'WiFi: 81Taproom',
   wifiPassword: '비밀번호: asanaki81',
   copied: '복사되었습니다!',
+
+  signIn: '로그인',
+  signOut: '로그아웃',
+  discount: '할인',
+  signInForDiscounts: 'Google 로그인으로 할인 받기',
+  discountApplied: '할인 적용',
 };
 
 export const translations: Record<Language, Translation> = {

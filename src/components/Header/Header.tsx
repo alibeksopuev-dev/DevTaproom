@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher/LanguageSwitcher';
+import { AuthButton } from '@/components/AuthButton/AuthButton';
 import { useCartStore } from '@/lib/store';
 import logo from '@/assets/81logo.png';
 import { useGetOrganizationByIdQuery } from '@/entities/organizations/api';
@@ -52,8 +53,9 @@ export function Header() {
             </div>
           </Link>
 
-          {/* Right: Language Switcher and Cart */}
+          {/* Right: Auth, Language Switcher and Cart */}
           <div className="flex items-center">
+            <AuthButton />
             <LanguageSwitcher />
 
             <Link to="/cart">

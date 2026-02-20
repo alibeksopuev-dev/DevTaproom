@@ -76,4 +76,11 @@ export interface Translation {
   wifiNetwork: string;
   wifiPassword: string;
   copied: string;
+
+  // Auth & Discounts
+  signIn: string;
+  signOut: string;
+  discount: string;
+  signInForDiscounts: string;
+  discountApplied: string;
 }

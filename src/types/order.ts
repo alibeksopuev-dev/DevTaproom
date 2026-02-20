@@ -18,6 +18,8 @@ export interface Order {
     payment_status: PaymentStatus;
     payment_reference: string | null;
     paid_at: string | null;
+    discount_percent: number;
+    discount_amount: number;
     created_at: string;
     updated_at: string;
     items?: OrderItem[];
@@ -37,7 +39,10 @@ export interface OrderItem {
 
 export interface CreateOrderRequest {
     organization_id: string;
+    user_id?: string;
     total_amount: number;
+    discount_percent?: number;
+    discount_amount?: number;
     notes?: string;
     table_number?: string;
     payment_method: PaymentMethod;

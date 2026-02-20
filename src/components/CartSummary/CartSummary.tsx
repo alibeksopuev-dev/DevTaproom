@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import type { Language } from '@/types/i18n';
 import { useCartStore } from '@/lib/store';
+import { useAuthStore } from '@/lib/authStore';
 import { getTranslation } from '@/lib/i18n/translations';
 import { formatPrice } from '@/lib/utils';
 import { sendToWhatsApp } from '@/lib/whatsapp';
@@ -19,11 +20,14 @@ interface CartSummaryProps {
 export function CartSummary({ language }: CartSummaryProps) {
   const navigate = useNavigate();
   const { items, orderNotes, setOrderNotes, getTotal, clearCart } = useCartStore();
+  const { user, discount } = useAuthStore();
   const t = getTranslation(language);
   const [createOrder, { isLoading }] = useCreateOrderMutation();
   const [tableNumber, setTableNumber] = useState('');
 
-  const total = getTotal();
+  const subtotal = getTotal();
+  const discountAmount = discount ? Math.round(subtotal * discount.discount_percent / 100) : 0;
+  const total = subtotal - discountAmount;
 
   const handlePayWithVietQR = async () => {
     try {
@@ -45,7 +49,10 @@ export function CartSummary({ language }: CartSummaryProps) {
 
       const result = await createOrder({
         organization_id: ORGANIZATION_ID,
+        user_id: user?.id,
         total_amount: total,
+        discount_percent: discount?.discount_percent || 0,
+        discount_amount: discountAmount,
         notes: orderNotes || undefined,
         table_number: tableNumber || undefined,
         payment_method: 'vietqr',
@@ -99,14 +106,42 @@ export function CartSummary({ language }: CartSummaryProps) {
 
       {/* Total */}
       <div className="border-t border-gray-200 pt-4">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-lg font-semibold text-gray-900">
-            {t.total}
-          </span>
-          <span className="text-2xl font-bold text-gray-900">
-            {formatPrice(total)}
-          </span>
-        </div>
+        {/* Discount info */}
+        {discount ? (
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center justify-between text-gray-500">
+              <span className="text-sm">{t.subtotal}</span>
+              <span className="text-sm line-through">{formatPrice(subtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between text-green-600">
+              <span className="text-sm font-medium flex items-center gap-1">
+                {discount.discount_percent}% {t.discount}
+                {discount.label && <span className="text-xs text-green-500">({discount.label})</span>}
+              </span>
+              <span className="text-sm font-medium">-{formatPrice(discountAmount)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-semibold text-gray-900">{t.total}</span>
+              <span className="text-2xl font-bold text-gray-900">{formatPrice(total)}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-lg font-semibold text-gray-900">
+              {t.total}
+            </span>
+            <span className="text-2xl font-bold text-gray-900">
+              {formatPrice(subtotal)}
+            </span>
+          </div>
+        )}
+
+        {/* Sign-in hint for anonymous users */}
+        {!user && (
+          <p className="text-xs text-gray-400 text-center mb-3">
+            {t.signInForDiscounts}
+          </p>
+        )}
 
         {/* Payment Options */}
         <div className="space-y-3">
