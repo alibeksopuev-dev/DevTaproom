@@ -14,10 +14,14 @@ export function AuthButton() {
     const [signingIn, setSigningIn] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Close dropdown on outside click
+    // Close dropdown on outside click — but ignore clicks inside Radix UI portals
+    // (e.g. the LanguageSwitcher's Select dropdown, which renders outside the DOM tree)
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            const target = event.target as Element;
+            // Radix portals are wrapped in [data-radix-popper-content-wrapper]
+            if (target.closest?.('[data-radix-popper-content-wrapper]')) return;
+            if (dropdownRef.current && !dropdownRef.current.contains(target)) {
                 setShowDropdown(false);
             }
         }
@@ -41,7 +45,7 @@ export function AuthButton() {
         await signOut();
     };
 
-    // Not signed in — show language switcher + compact sign-in button
+    // Not signed in — show compact language switcher + sign-in button
     if (!user) {
         return (
             <div className="flex items-center">
