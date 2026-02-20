@@ -86,7 +86,15 @@ export function CategoryView() {
       if (!groups[key]) groups[key] = [];
       groups[key].push(product);
     });
-    return groups;
+
+    // Sort: "BY THE GLASS" first (for wines), then alphabetically
+    const sorted = Object.entries(groups).sort(([a], [b]) => {
+      if (a === 'BY THE GLASS') return -1;
+      if (b === 'BY THE GLASS') return 1;
+      return a.localeCompare(b);
+    });
+
+    return Object.fromEntries(sorted);
   }, [products]);
 
   const isLoading = categoriesLoading || itemsLoading;
