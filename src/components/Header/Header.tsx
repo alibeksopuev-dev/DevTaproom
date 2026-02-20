@@ -2,7 +2,6 @@ import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher/LanguageSwitcher';
 import { AuthButton } from '@/components/AuthButton/AuthButton';
 import { useCartStore } from '@/lib/store';
 import logo from '@/assets/81logo.png';
@@ -27,7 +26,7 @@ export function Header() {
       <div className="max-w-4xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           {/* Left: Back Button or Logo */}
-          <div className="flex items-center min-w-[44px]">
+          <div className="hidden sm:flex items-center min-w-[44px]">
             {!isHome ? (
               <Button
                 variant="ghost"
@@ -56,7 +55,6 @@ export function Header() {
           {/* Right: Auth, Language Switcher and Cart */}
           <div className="flex items-center">
             <AuthButton />
-            <LanguageSwitcher />
 
             <Link to="/cart">
               <Button
