@@ -87,15 +87,19 @@ export function CategoryView() {
       groups[key].push(product);
     });
 
-    // Sort: "BY THE GLASS" first (for wines), then alphabetically
-    const sorted = Object.entries(groups).sort(([a], [b]) => {
-      if (a === 'BY THE GLASS') return -1;
-      if (b === 'BY THE GLASS') return 1;
-      return a.localeCompare(b);
-    });
+    // For wines, sort "BY THE GLASS" first
+    const WINES_CATEGORY_ID = '6bf715e5-a04a-49ca-89a4-6d68f7aa6369';
+    if (categoryId === WINES_CATEGORY_ID) {
+      const sorted = Object.entries(groups).sort(([a], [b]) => {
+        if (a === 'BY THE GLASS') return -1;
+        if (b === 'BY THE GLASS') return 1;
+        return a.localeCompare(b);
+      });
+      return Object.fromEntries(sorted);
+    }
 
-    return Object.fromEntries(sorted);
-  }, [products]);
+    return groups;
+  }, [products, categoryId]);
 
   const isLoading = categoriesLoading || itemsLoading;
   const error = itemsError;
