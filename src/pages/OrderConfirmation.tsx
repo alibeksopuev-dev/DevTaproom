@@ -145,6 +145,18 @@ export function OrderConfirmation() {
                                 <span className="font-semibold text-gray-900">{order.table_number}</span>
                             </div>
                         )}
+                        {!!order.discount_percent && !!order.discount_amount && order.discount_amount > 0 && (
+                            <>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Subtotal</span>
+                                    <span className="text-sm text-gray-500">{formatPrice(order.total_amount + order.discount_amount)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Discount ({order.discount_percent}%)</span>
+                                    <span className="text-sm font-medium text-green-600">-{formatPrice(order.discount_amount)}</span>
+                                </div>
+                            </>
+                        )}
                         <div className="flex justify-between">
                             <span className="text-sm text-gray-600">{t.total}</span>
                             <span className="font-bold text-gray-900">{formatPrice(order.total_amount)}</span>
