@@ -2,11 +2,11 @@ import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AuthButton } from '@/components/AuthButton/AuthButton';
 import { useCartStore } from '@/lib/store';
 import logo from '@/assets/81logo.png';
 import { useGetOrganizationByIdQuery } from '@/entities/organizations/api';
 import { ORGANIZATION_ID } from '@/lib/constants';
+import {LanguageSwitcher} from "@/components/LanguageSwitcher/LanguageSwitcher.tsx";
 
 export function Header() {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ export function Header() {
 
           {/* Right: Auth, Language Switcher and Cart */}
           <div className="flex items-center">
-            <AuthButton />
+            <LanguageSwitcher />
 
             <Link to="/cart">
               <Button
